@@ -3,7 +3,7 @@
 This repository contains MATLAB code accompanying the paper:
 
 > **Fractional calculus via variable-transform-based spectral approximations**
-> by Xiaolin Liu and Kuan Xu
+> by Xiaolin Liu and Kuan Xu — [arXiv:2604.25417](https://arxiv.org/abs/2604.25417)
 
 ## Overview
 
@@ -77,11 +77,13 @@ This code is provided for research purposes. Please cite the accompanying paper 
 ## Reference
 
 ```bibtex
-@article{liu2026spectral,
-  title   = {{Spectral approximation to fractional integral operators}},
-  author  = {Liu, Xiaolin and Xu, Kuan},
-  journal = {Mathematics of Computation},
-  year    = {2026},
-  doi     = {10.1090/mcom/4185},
+@misc{liu2026fractionalcalculusvariabletransformbasedspectral,
+      title={Fractional calculus via variable-transform-based spectral approximations},
+      author={Xiaolin Liu and Kuan Xu},
+      year={2026},
+      eprint={2604.25417},
+      archivePrefix={arXiv},
+      primaryClass={math.NA},
+      url={https://arxiv.org/abs/2604.25417},
 }
 ```
