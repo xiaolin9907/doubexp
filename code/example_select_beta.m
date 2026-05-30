@@ -1,8 +1,10 @@
 %% example_select_beta.m
-%  Demonstrates how to select the optimal parameter beta (ω) for the
+%  Demonstrates how to select the optimal parameter beta (omega) for the
 %  double-exponential transform. The optimal beta depends on the singularity
-%  strength mu. The dashed lines mark the theoretically optimal values.
+%  strength mu. The dashed lines mark the theoretically optimal values
+%   beta_opt(mu) = max(3.15, asinh(...)).
 
+% ---------- Parameter sweep ----------
 MU = [1 1/10 1/100 1e-3 1e-4 1e-5 1e-6];
 beta_opt = [];
 BB = max(3.15, asinh((log(2) - log(eps)/MU(end) + log1p(-0.5 * eps^(1/MU(end)))) / pi));
@@ -10,8 +12,8 @@ ERR = [];
 
 for j = 1:length(MU)
     mu = MU(j);
-    f = @(x) (1+x).^mu;
-    B = 2:0.05:BB+8;
+    f = @(x) (1+x).^mu;                % test function with endpoint singularity
+    B = 2:0.05:BB+8;                   % range of beta values to try
     errdm = [];
     dom = [-1,1];
     xcheck = linspace(dom(1), dom(2), 100);
@@ -20,8 +22,10 @@ for j = 1:length(MU)
 
     for i = 1:length(B)
         b = B(i);
+        % DE-transformed grid points
         xx = chebpts(n);
         y = pi * sinh(b * xx);
+        % Numerically stable computation of (1+x)^mu on the DE grid
         ln_ff = zeros(size(y));
         idx_pos = (y >= 0);
         ln_ff(idx_pos) = log(2) - log1p(exp(-y(idx_pos)));
@@ -30,6 +34,7 @@ for j = 1:length(MU)
         yy = exp(mu * ln_ff);
         fc = chebtech2.vals2coeffs(yy);
 
+        % Map physical points back through the DE transform and evaluate
         tinv = @(y) asinh(2/pi .* atanh(y))./b;
         xx = tinv(xcheck);
         xx(xx > 1) = 1;
@@ -39,9 +44,11 @@ for j = 1:length(MU)
         errdm = [errdm norm(fx - fcx, 'Inf')];
     end
     ERR = [ERR; errdm];
+    % Theoretical optimal beta for this mu
     beta_opt = [beta_opt max(3.154, asinh((log(2) - log(eps)/mu + log1p(-0.5 * eps^(1/mu))) / pi))];
 end
 
+% ---------- Plotting ----------
 col = [
     0.10, 0.35, 0.65;  % Navy blue
     0.85, 0.20, 0.25;  % Brick red
@@ -69,6 +76,7 @@ xlabel('$\omega$', 'FontSize', 16, 'Interpreter', 'latex');
 ylabel('error', 'FontSize', 16, 'Interpreter', 'latex');
 yticks([1e-15 1e-10 1e-5 1]);
 
+% ---------- Clenshaw's algorithm ----------
 function y = clenshaw_chebyshev(c, x)
     N = length(c) - 1;
     y = zeros(size(x));

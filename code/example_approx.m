@@ -1,16 +1,21 @@
 %% example_approx.m
 %  Demonstrates spectral convergence of the double-exponential (DE) transform
 %  for approximating functions with endpoint singularities.
-%  Compares naive DE approximation vs. the improved formula (3.7) from the paper.
+%  Compares two approaches:
+%    naive DE   — direct DE-transformed Chebyshev expansion
+%    (3.7)      — the improved formula that separately handles the singular
+%                 factor, yielding faster convergence
 
+% ---------- Setup: singular function  f(x) = (1-x)^{1/3} (1+x)^{1/2} ----------
 mu = 1/3;
 f = @(x) (1-x).^(1/3).*(1+x).^(1/2);
-b = max(3.15, asinh((mu*log(2) - log(eps))/(mu*pi)));
+b = max(3.15, asinh((mu*log(2) - log(eps))/(mu*pi)));   % optimal DE parameter
 
-errd = [];  % naive DE error
-errdm = []; % improved formula (3.7) error
+errd = [];   % error history — naive DE
+errdm = [];  % error history — formula (3.7)
 dom = [-1,1];
 
+% Evaluation grid for measuring error
 xcheck = linspace(dom(1), dom(2), 20000);
 fx = f(xcheck);
 tinv = @(y) asinh(2/pi .* atanh(y))./b;
@@ -20,13 +25,16 @@ xx(xx < -1) = -1;
 
 n = 1:1:500;
 
+% ---------- Naive DE approximation ----------
 for k = n
     fc = doubexp(f, k, b, dom);
     fcx = clenshaw_chebyshev(fc, 2/(dom(2)-dom(1)).*(xx - (dom(1)+dom(2))/2));
     errd = [errd norm(fx - fcx, 'Inf')];
 end
 
+% ---------- Improved approximation (formula 3.7 in paper) ----------
 for k = n
+    % Compute Chebyshev coefficients of  (1+x)^mu  on the DE grid
     x = chebpts(k);
     y = pi * sinh(b * x);
     ln_ff = zeros(size(y));
@@ -36,6 +44,7 @@ for k = n
     ln_ff(idx_neg) = log(2) - (-y(idx_neg) + log1p(exp(y(idx_neg))));
     yy1 = exp(mu * ln_ff);
 
+    % Compute Chebyshev coefficients of  (1-x)^{1/2}  on the DE grid
     x = chebpts(k);
     y = pi * sinh(b * x);
     ln_ff = zeros(size(y));
@@ -44,12 +53,13 @@ for k = n
     idx_neg = ~idx_pos;
     ln_ff(idx_neg) = log(2) - (-y(idx_neg) + log1p(exp(y(idx_neg))));
     yy2 = exp(1/2 * ln_ff);
-    fc = chebtech2.vals2coeffs(flip(yy1).*yy2);
+    fc = chebtech2.vals2coeffs(flip(yy1).*yy2);   % combine both singular factors
 
     fcx = clenshaw_chebyshev(fc, 2/(dom(2)-dom(1)).*(xx - (dom(1)+dom(2))/2));
     errdm = [errdm norm(fx - fcx, 'Inf')];
 end
 
+% ---------- Plot results ----------
 figure('Units', 'inches', 'Position', [1 1 8 4]);
 semilogy(n, errd, 'LineWidth', 2); hold on;
 semilogy(n, errdm, 'LineWidth', 2);
@@ -58,6 +68,7 @@ legend({'naive', '(3.7)'}, 'NumColumns', 1, 'FontSize', 12, 'Interpreter', 'late
 xlabel('$N$', 'FontSize', 16, 'Interpreter', 'latex');
 ylabel('error', 'FontSize', 16, 'Interpreter', 'latex');
 
+% ---------- Clenshaw's algorithm for evaluating Chebyshev series ----------
 function y = clenshaw_chebyshev(c, x)
     N = length(c) - 1;
     y = zeros(size(x));

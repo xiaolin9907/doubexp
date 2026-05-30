@@ -1,8 +1,12 @@
 %% example_basis_plot.m
 %  Visualizes the transplanted Chebyshev polynomials (TCPs) Q_n(x) under
 %  the double-exponential (DE) and algebraic (JFP) variable transforms.
+%  TCPs are defined as  Q_n(x) = T_n(psi^{-1}(x))  where psi maps [-1,1]
+%  onto itself.
 
 b = 3.15;
+
+% Standard Chebyshev polynomials (as chebfun objects)
 T0 = chebpoly(0);
 T1 = chebpoly(1);
 T2 = chebpoly(2);
@@ -11,10 +15,10 @@ T4 = chebpoly(4);
 
 x = chebpts(1000);
 
-% DE-transformed Chebyshev polynomials
+% ========  DE-transformed Chebyshev polynomials  ========
 tinv = @(y) asinh(2/pi .* atanh(y))./b;
 xx_de = tinv(x);
-xx_de(xx_de > 1) = 1;
+xx_de(xx_de > 1) = 1;                 % clamp to domain
 xx_de(xx_de < -1) = -1;
 
 y0 = T0(xx_de); y1 = T1(xx_de); y2 = T2(xx_de);
@@ -29,8 +33,8 @@ legend({'Q_0(x)', 'Q_1(x)', 'Q_2(x)', 'Q_3(x)', 'Q_4(x)'}, ...
     'Position', [0.36, 0.24, 0.2, 0.15], 'NumColumns', 2, 'FontSize', 12);
 title('DE-transformed Chebyshev polynomials (TCPs)');
 
-% Algebraic (JFP) transformed Chebyshev polynomials
-xx_jfp = 2*sqrt((x+1)/2) - 1;
+% ========  Algebraic (JFP) transformed Chebyshev polynomials  ========
+xx_jfp = 2*sqrt((x+1)/2) - 1;         % algebraic map
 y0_j = T0(xx_jfp); y1_j = T1(xx_jfp); y2_j = T2(xx_jfp);
 y3_j = T3(xx_jfp); y4_j = T4(xx_jfp);
 Y_jfp = [y0_j y1_j y2_j y3_j y4_j];

@@ -1,10 +1,13 @@
 %% example_irrational_order.m
 %  Solves a fractional integral equation with irrational-order fractional
 %  operators: (I + I^{e/3} + I^{pi/4}) u = 1.
-%  Demonstrates that the DE-based method handles irrational orders naturally.
+%  Demonstrates that the DE-based method handles irrational orders naturally —
+%  no rational approximation of the order is needed.
 
 b = 3.65;
 N = 5:2:200;
+
+% Precompute operators at the largest N (they are banded, so we slice)
 I11 = frac_coeffs(N(end), exp(1)/3, b, -1);
 I22 = frac_coeffs(N(end), pi/4, b, -1);
 
@@ -22,12 +25,14 @@ for r = 1:length(N)
     u(1:n, r) = utemp;
 end
 
+% Cauchy error = difference between successive N
 ud = diff(u')';
 err = zeros(length(N)-1, 1);
 for k = 1:length(N)-1
     err(k) = norm(ud(:, k));
 end
 
+% ---------- Plot ----------
 figure('Units', 'inches', 'Position', [1 1 6 5]);
 semilogy(N(1:end-1), err + eps, 'LineWidth', 1.5);
 xlabel('N', 'FontSize', 16, 'Interpreter', 'latex');

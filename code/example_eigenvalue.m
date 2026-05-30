@@ -1,7 +1,9 @@
 %% example_eigenvalue.m
 %  Computes eigenvalues of a fractional integral operator using the DE method.
-%  Demonstrates Cauchy error convergence of the computed eigenvalues as N increases.
+%  Demonstrates Cauchy error convergence of the computed eigenvalues as N
+%  (the discretisation size) increases.
 
+% ---------- Parameters ----------
 six_colors = [
     1 0 0;       % Red
     0 0.5 0;     % Dark green
@@ -11,16 +13,18 @@ six_colors = [
     0 0.75 0.75  % Cyan
 ];
 
-mu = 1.23456789;
-mu2 = 0.123456789;
+mu = 1.23456789;       % fractional order (irrational)
+mu2 = 0.123456789;     % auxiliary order  mu2 < mu
 b = max(3.15, asinh((mu2*log(2) - log(eps))/(mu2*pi)));
 
 n = 500;
 
+% ---------- Construct transformed operator ----------
 op = frac_coeffs(n, mu, b, -1);
 op2 = frac_coeffs(n, mu - mu2, b, -1);
 B = ones(1, n);
 
+% Compute the function g that appears in the eigenvalue formulation
 xx = chebpts(n);
 y = pi * sinh(b * xx);
 ln_ff = zeros(size(y));
@@ -32,18 +36,19 @@ yy = exp((mu-1) * ln_ff);
 g = chebtech2.vals2coeffs(yy);
 
 C = (gamma(mu - mu2)/gamma(mu)) * 2^(1 - mu + mu2) * g * B * op2;
-OPeig = C - op;
+OPeig = C - op;      % the eigenvalue operator
 
-% Compute eigenvalue convergence
+% ---------- Track eigenvalue convergence with increasing N ----------
 ce = [];
 l = 20:1:n;
 for n_k = l
     [v, d] = eigs(OPeig(1:n_k, 1:n_k), 11);
-    d = 1 ./ diag(d);
+    d = 1 ./ diag(d);                    % eigenvalues
     d = sort(d);
     ce = [ce d(1:11)];
 end
 
+% Cauchy errors: successive differences
 [m1, m2] = size(ce);
 ced = zeros(m1, m2-1);
 for k = 1:11
@@ -54,6 +59,7 @@ ced(ced == 0) = 1e-16;
 
 ll = length(l) - 1;
 
+% ---------- Plot Cauchy error ----------
 figure('Units', 'inches', 'Position', [1 1 8 4]);
 semilogy(l(1:ll), ced(1, 1:ll), 'Color', six_colors(1,:), 'LineWidth', 2); hold on;
 semilogy(l(1:ll), ced(2, 1:ll), 'Color', six_colors(2,:), 'LineWidth', 2);
