@@ -1,0 +1,26 @@
+# MATLAB
+*.asv
+*.m~*
+
+# macOS
+.DS_Store
+__MACOSX/
+
+# Data files (too large for GitHub; available on request)
+*.mat
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.thm
+
+# Figures (generated)
+*.png
+*.pdf
+*.eps
