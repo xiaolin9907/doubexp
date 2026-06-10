@@ -159,7 +159,7 @@ if sgn == -1
     idx_pos = (y_mid >= 0);
     ln_f(idx_pos) = log(2) - log1p(exp(-y_mid(idx_pos)));
     idx_neg = ~idx_pos;
-    ln_f(idx_neg) = log(2) - (-y_mid(idx_neg) + log1p(exp(y(idx_neg))));
+    ln_f(idx_neg) = log(2) - (-y_mid(idx_neg) + log1p(exp(y_mid(idx_neg))));
     y = exp(mu * ln_f);
     fc = chebtech2.vals2coeffs(y);
     for k = 1:size(T,2)
